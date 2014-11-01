@@ -1,5 +1,7 @@
 package ch.usi.inf.l3.elang.ast
 
+import ch.usi.inf.l3.elang.namer._
+
 
 trait Position
 object Position {
@@ -40,7 +42,9 @@ class Pos(val fname: String, val line: Int, val col: Int)
 
 
 trait Tree {
-  val pos: Position
+  def pos: Position
+  val symbol: S
+  type S <: Symbol
 }
 
 trait EmptyAlg

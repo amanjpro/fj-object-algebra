@@ -1,35 +1,118 @@
 package ch.usi.inf.l3.fj.ast
 
-import ch.usi.inf.l3.elang.ast._
+import ch.usi.inf.l3._
+import elang.ast._
+import elang.namer._
 
+trait Program extends Tree {
+  type S = Symbol
+  val classes: List[ClassDef]
+  val main: Expr
 
-case class Program(classes: List[ClassDef], main: Expr) extends Tree {
-  val pos: Position = NoPosition
+  // override def canEqual(other: Any): Boolean = other.isInstanceOf[Program]
+  //
+  // override def equals(other: Any): Boolean = {
+  //   other match {
+  //     case c: Program => c.canEqual(this) && super.equals(c) && 
+  //                 fname == c.fname &&
+  //                 line == c.line
+  //                 col == c.line
+  //     case _ => false
+  //   } 
+  // }
+  //
+  // override def hashCode: Int = {
+  //   val p = 43
+  //   val r1 = p + fname.hashCode
+  //   val r2 = p * r1 + line.hashCode
+  //   p * r2 + col.hashCode
+  // }
 }
 
-case class ClassDef(name: String, parent: Ident, fields: List[ValDef], 
-      const: ConstDef, methods: List[MethodDef], 
-      pos: Position) extends Tree
+trait ClassDef extends Tree {
+  type S = ClassSymbol
+  val name: String
+  val parent: Ident
+  val fields: List[ValDef]
+  val const: ConstDef
+  val methods: List[MethodDef]
+}
 
 
-case class ConstDef(tpe: Ident, params: List[ValDef], 
-  su: Super, finit: List[FieldInit], pos: Position) extends Tree
+trait ConstDef extends Tree {
+  type S = TermSymbol
+  val t: Ident
+  val params: List[ValDef]
+  val su: Super
+  val finit: List[FieldInit]
+}
 
-case class FieldInit(name: String, rhs: Expr, pos: Position) extends Tree
-case class Super(exprs: List[Expr], pos: Position) extends Tree
+trait FieldInit extends Tree {
+  type S = UseSymbol
+  val name: Ident
+  val rhs: Expr
+}
 
-case class MethodDef(tpe: Ident, name: String, 
-      params: List[ValDef], body: Expr, pos: Position) extends Tree
-case class ValDef(tpe: Ident, name: String, pos: Position) extends Tree
+trait Super extends Tree {
+  type S = UseSymbol
+  val exprs: List[Expr]
+}
 
 
-trait Expr extends Tree
-case class Ident(name: String, pos: Position) extends Expr
-case class Select(s: Expr, m: String, pos: Position) extends Expr
-case class Apply(expr: Expr, m: String, args: List[Expr], 
-      pos: Position) extends Expr
-case class New(id: Ident, args: List[Expr], pos: Position) extends Expr
-case class Cast(id: Ident, expr: Expr, pos: Position) extends Expr
+trait MethodDef extends Tree {
+  type S = TermSymbol
+  val t: Ident
+  val name: String
+  val params: List[ValDef]
+  val body: Expr
+}
+
+trait ValDef extends Tree {
+  type S = TermSymbol
+  val t: Ident
+  val name: String
+  override def toString = s"${t} ${name}"
+}
+
+
+trait Expr extends Tree {
+  type S = UseSymbol
+}
+
+trait This extends Expr {
+  override def toString = "this"
+}
+
+trait Ident extends Expr {
+  val name: String
+  override def toString = s"${name}"
+}
+
+trait Select extends Expr {
+  val s: Expr
+  val m: String
+  override def toString = s"${s}.${m}"
+}
+
+trait Apply extends Expr {
+  val expr: Expr
+  val m: String
+  val args: List[Expr] 
+  override def toString = s"${expr}.${m}${args}"
+}
+
+trait New extends Expr {
+  val id: Ident
+  val args: List[Expr]
+  override def toString = s"new ${id}${args}"
+}
+
+trait Cast extends Expr {
+  val id: Ident
+  val expr: Expr
+  override def toString = s"(${id}) ${expr}"
+}
+
 // case class Literal(v: Constant, pos: Position) extends Expr
 
 
@@ -53,130 +136,213 @@ case class Cast(id: Ident, expr: Expr, pos: Position) extends Expr
 //   override getDouble: Double = v
 // }
 //
+
+
 trait GFJAlg[T, E <: T, P <: T, C <: T,
              VD <: T, CD <: T, MD <: T,
              FI <: T, S <: T,
-             I <: E, SE <: E, A <: E,
+             I <: E, Tz <: E, SE <: E, A <: E,
              N <: E, CA <: E] extends EmptyAlg {
+
+
   def Program(classes: List[C], main: E): P
 
   def ClassDef(name: String, parent: I, fields: List[VD], 
-            const: CD, ms: List[MD], pos: Position): C
+            const: CD, ms: List[MD], pos: Position, symbol: ClassSymbol): C
 
   def ConstDef(tpe: I, params: List[VD], 
-    su: S, finit: List[FI], pos: Position): CD
+    su: S, finit: List[FI], pos: Position, symbol: TermSymbol): CD
 
-  def FieldInit(name: String, rhs: E, pos: Position): FI
+  def FieldInit(name: I, rhs: E, pos: Position, symbol: UseSymbol): FI
 
-  def Super(exprs: List[E], pos: Position): S 
+  def Super(exprs: List[E], pos: Position, symbol: UseSymbol): S 
 
   def MethodDef(tpe: I, name: String, 
-        params: List[VD], body: E, pos: Position): MD 
+        params: List[VD], body: E, pos: Position, symbol: TermSymbol): MD 
 
-  def ValDef(tpe: I, name: String, pos: Position): VD
+  def ValDef(tpe: I, name: String, pos: Position, symbol: TermSymbol): VD
 
 
-  def Ident(name: String, pos: Position): I 
+  def Ident(name: String, pos: Position, symbol: UseSymbol): I 
 
-  def Select(s: E, m: String, pos: Position): SE
+  def This(pos: Position, symbol: UseSymbol): Tz
+
+  def Select(s: E, m: String, pos: Position, symbol: UseSymbol): SE
   
   def Apply(expr: E, m: String, args: List[E], 
-        pos: Position): A 
+        pos: Position, symbol: UseSymbol): A 
 
-  def New(id: I, args: List[E], pos: Position): N
+  def New(id: I, args: List[E], pos: Position, symbol: UseSymbol): N
 
-  def Cast(id: I, expr: E, pos: Position): CA 
+  def Cast(id: I, expr: E, pos: Position, symbol: UseSymbol): CA 
 
   // def Literal(v: Constant, pos: Position): E 
 }
 
-trait FJAlg[E] extends GFJAlg[E, E, E, E, E, E, E, 
+trait FJAlg[E] extends GFJAlg[E, E, E, E, E, E, E, E,
                               E, E, E, E, E, E, E] {
   // Re-writing the defs just for convenience
   def Program(classes: List[E], main: E): E
 
   def ClassDef(name: String, parent: E, fields: List[E], 
-            const: E, ms: List[E], pos: Position): E
+            const: E, ms: List[E], pos: Position, symbol: ClassSymbol): E
 
   def ConstDef(tpe: E, params: List[E], 
-    su: E, finit: List[E], pos: Position): E
+    su: E, finit: List[E], pos: Position, symbol: TermSymbol): E
 
-  def FieldInit(name: String, rhs: E, pos: Position): E
+  def FieldInit(name: E, rhs: E, pos: Position, symbol: UseSymbol): E
 
-  def Super(exprs: List[E], pos: Position): E 
+  def Super(exprs: List[E], pos: Position, symbol: UseSymbol): E 
 
   def MethodDef(tpe: E, name: String, 
-        params: List[E], body: E, pos: Position): E 
+        params: List[E], body: E, pos: Position, symbol: TermSymbol): E 
 
-  def ValDef(tpe: E, name: String, pos: Position): E
+  def ValDef(tpe: E, name: String, pos: Position, symbol: TermSymbol): E
 
 
-  def Ident(name: String, pos: Position): E 
+  def This(pos: Position, symbol: UseSymbol): E
 
-  def Select(s: E, m: String, pos: Position): E
+  def Ident(name: String, pos: Position, symbol: UseSymbol): E 
+
+  def Select(s: E, m: String, pos: Position, symbol: UseSymbol): E
   
   def Apply(expr: E, m: String, args: List[E], 
-        pos: Position): E 
+        pos: Position, symbol: UseSymbol): E 
 
-  def New(id: E, args: List[E], pos: Position): E
+  def New(id: E, args: List[E], pos: Position, symbol: UseSymbol): E
 
-  def Cast(id: E, expr: E, pos: Position): E 
+  def Cast(id: E, expr: E, pos: Position, symbol: UseSymbol): E 
 }
 
 trait FJAlgAST extends GFJAlg[Tree, Expr, Program, ClassDef,
                              ValDef, ConstDef, MethodDef,
-                             FieldInit, Super, Ident,
+                             FieldInit, Super, Ident, This,
                              Select, Apply, New, Cast] {
-  def Program(classes: List[ClassDef], main: Expr): Program = {
-    Program(classes, main)
+  def Program(cs: List[ClassDef], m: Expr): Program = {
+    new {
+      val classes = cs
+      val main = m
+      val symbol: Symbol = NoSymbol
+      val pos = NoPosition
+    } with Program
   }
 
-  def ClassDef(name: String, parent: Ident, fields: List[ValDef],
-            const: ConstDef, methods: List[MethodDef],
-            pos: Position): ClassDef = {
-    ClassDef(name, parent, fields, const, methods, pos)
+  def ClassDef(n: String, p: Ident, fs: List[ValDef],
+            c: ConstDef, ms: List[MethodDef],
+            po: Position, s: ClassSymbol): ClassDef = {
+    new {
+      val name = n
+      val parent = p
+      val fields = fs
+      val const = c
+      val methods = ms
+      val pos = po
+      val symbol = s
+    } with ClassDef
   }
 
-  def ConstDef(tpe: Ident, params: List[ValDef], 
-    su: Super, finit: List[FieldInit], pos: Position): ConstDef = {
-    ConstDef(tpe, params, su, finit, pos)
+  def ConstDef(tpe: Ident, ps: List[ValDef], 
+    s: Super, f: List[FieldInit], p: Position, 
+    sym: TermSymbol): ConstDef = {
+    new {
+      val t = tpe
+      val params = ps
+      val su = s
+      val finit = f
+      val pos = p
+      val symbol = sym
+    } with ConstDef
   }
 
-  def FieldInit(name: String, rhs: Expr, pos: Position): FieldInit = {
-    FieldInit(name, rhs, pos)
+  def FieldInit(n: Ident, r: Expr, p: Position, s: UseSymbol): FieldInit = {
+    new {
+      val name = n
+      val rhs = r
+      val pos = p
+      val symbol = s
+    } with FieldInit
   }
 
-  def Super(exprs: List[Expr], pos: Position): Super = {
-    Super(exprs, pos)
+  def Super(e: List[Expr], p: Position, s: UseSymbol): Super = {
+    new {
+      val exprs = e
+      val pos = p
+      val symbol = s
+    } with Super
   } 
 
-  def MethodDef(tpe: Ident, name: String, 
-        params: List[ValDef], body: Expr, pos: Position): MethodDef = {
-    MethodDef(tpe, name, params, body, pos)
+  def MethodDef(tpe: Ident, n: String, 
+        ps: List[ValDef], b: Expr, 
+        p: Position, s: TermSymbol): MethodDef = {
+    new {
+      val t = tpe
+      val name = n
+      val params = ps
+      val body = b
+      val pos = p
+      val symbol = s
+    } with MethodDef
   }
 
-  def ValDef(tpe: Ident, name: String, pos: Position): ValDef = {
-    ValDef(tpe, name, pos)
+  def ValDef(tpe: Ident, n: String, p: Position, 
+        s: TermSymbol): ValDef = {
+    new {
+      val t = tpe
+      val name = n
+      val pos = p
+      val symbol = s
+    } with ValDef 
   }
 
-
-  def Ident(name: String, pos: Position): Ident = {
-    Ident(name, pos)
-  }
-  def Select(s: Expr, m: String, pos: Position): Select = {
-    Select(s, m, pos)
-  }
-  def Apply(expr: Expr, m: String, args: List[Expr], 
-        pos: Position): Apply = {
-    Apply(expr, m, args, pos)
+  def This(p: Position, s: UseSymbol): This = {
+    new {
+      val pos = p
+      val symbol: UseSymbol = s
+    } with This 
   }
 
-  def New(id: Ident, args: List[Expr], pos: Position): New = {
-    New(id, args, pos)
+  def Ident(n: String, p: Position, s: UseSymbol): Ident = {
+    new {
+      val name = n
+      val pos = p
+      val symbol: UseSymbol = s
+    } with Ident 
+  }
+  def Select(sel: Expr, mem: String, p: Position, sym: UseSymbol): Select = {
+    new {
+      val s = sel
+      val m = mem
+      val symbol: UseSymbol = sym
+      val pos = p
+    } with Select 
+  }
+  def Apply(e: Expr, mem: String, as: List[Expr], 
+        p: Position, s: UseSymbol): Apply = {
+    new {
+      val expr = e
+      val m = mem
+      val args = as
+      val symbol: UseSymbol = s
+      val pos = p
+    } with Apply 
   }
 
-  def Cast(id: Ident, expr: Expr, pos: Position): Cast = {
-    Cast(id, expr, pos)
+  def New(i: Ident, as: List[Expr], p: Position, s: UseSymbol): New = {
+    new {
+      val id = i
+      val args = as
+      val pos = p
+      val symbol: UseSymbol = s
+    } with New 
+  }
+
+  def Cast(i: Ident, e: Expr, p: Position, s: UseSymbol): Cast = {
+    new {
+      val id = i
+      val expr = e
+      val pos = p
+      val symbol: UseSymbol = s
+    } with Cast 
   }
 
   // def Literal(v: Constant, pos: Position): Literal = {
@@ -187,3 +353,4 @@ trait FJAlgAST extends GFJAlg[Tree, Expr, Program, ClassDef,
 }
 
 object FJAlgAST extends FJAlgAST
+

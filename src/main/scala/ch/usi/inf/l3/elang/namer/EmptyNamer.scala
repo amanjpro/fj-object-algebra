@@ -1,99 +1,71 @@
 package ch.usi.inf.l3.elang.namer
 
-// trait Tpe
-// case object Error extends Type
-// case class ATpe(str: String) extends Type
-//
-// class Types private (private val store: List[String] = Nil){
-//   def put(s: String): Types = new Types(s :: store)
-//   def get(s: String): Type = store.contains(s) match {
-//     case false => Error
-//     case _ => ATpe(s)
-//   }
-//   def has(s: String): Boolean = store.contains(s)
-// }
+import ch.usi.inf.l3._
+import elang.typecheck._
+import elang.namer._
+import fj.namer.Names._
 
-
-
-trait Type
-case object ErrorType extends Type
-case object NoType extends Type
-
-trait TType extends Type {
-  def isSubtypeOf(other: TType)(implicit context: SymbolTable): Boolean
-  def vars: List[VarType]
-  def methods: List[MethodType]
-  def field(name: String)(implicit context: SymbolTable): Option[VarType]
-  def method(name: String)(implicit context: SymbolTable): Option[MethodType]
+trait Symbol {
+  var tpe: Type
+  var name: String
+  var owner: Symbol
+  def enclosingClass: Option[ClassSymbol]
 }
 
-case object ObjectType extends TType {
-  def isSubtypeOf(other: TType)(implicit context: SymbolTable): Boolean = 
-    other == this
-  def vars: List[VarType] = Nil
-  def methods: List[MethodType] = Nil
-  def field(name: String)(implicit context: SymbolTable): Option[VarType] = 
-    None
-  def method(name: String)(implicit context: SymbolTable): Option[MethodType] = 
-    None
+case object NoSymbol extends Symbol {
+  var tpe: Type = NoType
+  var name: String = NONAME
+  var owner: Symbol = NoSymbol
+  def enclosingClass: Option[ClassSymbol] = None
 }
 
-case class ClassType(name: String, parent: String, vars: List[VarType], 
-                     methods: List[MethodType]) extends TType {
-  def isSubtypeOf(other: TType)(implicit context: 
-                  SymbolTable): Boolean = {
-    context.get(parent) match {
-      case Some(p) => 
-        if(other == this || other == p || p == ObjectType) true
-        else {
-          p.isSubtypeOf(other) 
-        }
-      case None => false
-    }
-  }
-
-  def field(name: String)(implicit context: 
-              SymbolTable): Option[VarType] = {
-    vars.filter(_.name == name).headOption match {
-      case None => context.get(parent) match {
-        case Some(p) => p.field(name)
-        case _ => None
-      }
-      case m => m
-    }
-  }
-
-  def method(name: String)(implicit context:
-              SymbolTable): Option[MethodType] = {
-    methods.filter(_.name == name).headOption match {
-      case None => context.get(parent) match {
-        case Some(p) => p.method(name)
-        case _ => None
-      }
-      case m => m
-    }
-  }
+case class ClassSymbol(var name: String, var tpe: Type,
+        var owner: Symbol, var parent: Symbol) extends Symbol {
+  def this() = this(null, null, null, null)
+  def enclosingClass: Option[ClassSymbol] = None
 }
 
-case class VarType(name: String, tpe: String) extends Type
-case class MethodType(ret: String, name: String, 
-        params: List[VarType]) extends Type {
-  def field(name: String): Option[VarType] = {
-    params.filter(_.name == name).headOption 
+case class TermSymbol(var name: String, var tpe: Type,
+        var owner: Symbol) extends Symbol {
+  def this() = this(null, null, null) 
+  def enclosingClass: Option[ClassSymbol] = owner match {
+    case x: ClassSymbol => Some(x)
+    case _ => owner.owner.enclosingClass
   }
+  override def toString: String = s"method ${name}"
+  override def hashCode = name.hashCode
 }
 
-case class SymbolTable private (private val context: 
-        Map[String, TType] = Map("Object" -> ObjectType)){
-  def put(nme: String, tpe: TType): SymbolTable = {
-    SymbolTable(context + (nme -> tpe))
+case class UseSymbol(var uses: Symbol) extends Symbol {
+  def this() = this(null)
+  // This is mean, but we really don't care about setting the tpe
+  def tpe_=(tpe: Type): Unit = ()
+  def tpe: Type = uses match {
+    case null => NoType
+    case _ => uses.tpe
   }
-  def get(nme: String): Option[TType] = context.get(nme)
-  def defines(nme: String): Boolean = context.contains(nme)
+  // This is mean, but we really don't care about setting the name
+  def name_=(n: String): Unit = ()
+  def name: String = uses match {
+    case null => NONAME
+    case _ => uses.name
+  }
+  def owner_=(sym: Symbol): Unit = ???
+  def owner: Symbol = uses.owner
+  def enclosingClass: Option[ClassSymbol] = None
+}
+
+
+case object ObjectSymbol extends Symbol {
+  var tpe: Type = ObjectType
+  var name: String = "Object"
+  var owner: Symbol = NoSymbol
+  def enclosingClass: Option[ClassSymbol] = None
 }
 
 trait Namer {
-  def name(st: SymbolTable): (SymbolTable, Type)
-  val treeName: String
-  def treeType(st: SymbolTable): Type
+  def nameIt(owner: Symbol): Unit
 }
+
+
+
