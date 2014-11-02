@@ -54,7 +54,7 @@ trait FJExprTypers extends FJExprAlg[TypeCheck with Tree] with FJTypers {
         val rr = rhs.check
         val rt = symbol.tpe match {
           case NoType => Failure(s"${lhs.symbol.tpe} is not compatible with " +
-                                 s"${rhs.symbol.tpe}")
+                                 s"${rhs.symbol.tpe} for operation ${op.name}")
           case _ => Success
         }
         rl && rr && rt

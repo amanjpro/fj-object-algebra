@@ -127,8 +127,9 @@ trait FJExprAnalyzers extends FJExprAlg[Analyzer with Tree] with FJAnalyzers {
   }
   def deriveType(t1: Type, op: Bop, t2: Type): Type = {
     def isNumeric(op: Bop): Boolean = 
-      op == Add || op == Sub || op == Mul || op == Div || op == Mod ||
-            op == Gt || op == Lt || op == Leq || op == Geq
+      op == Add || op == Sub || op == Mul || op == Div || op == Mod
+    def isComparative(op: Bop) = 
+      op == Gt || op == Lt || op == Leq || op == Geq
     def isLogic(op: Bop): Boolean = op == And || op == Or
     def isEq(op: Bop): Boolean = op == Eq || op == Neq
     (t1, op, t2) match {
@@ -138,8 +139,11 @@ trait FJExprAnalyzers extends FJExprAlg[Analyzer with Tree] with FJAnalyzers {
       case (FloatType, o, FloatType) if isNumeric(o) => FloatType
       case (FloatType, o, IntType) if isNumeric(o) => FloatType
       case (IntType, o, IntType) if isNumeric(o) => IntType
+      case (FloatType, o, FloatType) if isComparative(o) => BoolType
+      case (FloatType, o, IntType) if isComparative(o) => BoolType
+      case (IntType, o, IntType) if isComparative(o) => BoolType
       case (BoolType, o, BoolType) if isLogic(o) => BoolType
-        case (a: PrimitiveType, o, b: PrimitiveType) if a == b && isLogic(o) => 
+      case (a: PrimitiveType, o, b: PrimitiveType) if a == b && isEq(o) => 
         BoolType
       case (_, _, _) => NoType
     } 
