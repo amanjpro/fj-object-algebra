@@ -17,22 +17,6 @@ import fj.typecheck._
 import fj.eval._
 
 
-// Tree, 
-// Expr, 
-// Program, 
-// ClassDef,
-// ValDef, 
-// ConstDef, 
-// MethodDef,
-// FieldInit, 
-// Super, 
-// Ident, 
-// This,
-// Select, 
-// Apply, 
-// New, 
-// Cast
-//
 trait FJCompilerTrait {
 
   type Others = Namer with Analyzer with TypeCheck with Eval with Show
@@ -76,31 +60,30 @@ trait FJCompilerTrait {
   // object FJLifter extends FJLifter
   //
 
-  trait FJLangAlg extends GFJAlg[
-    Tree with Others, 
-    Expr with Others, 
-    Program with Others, 
-    ClassDef with Others, 
-    ValDef with Others, 
-    ConstDef with Others, 
-    MethodDef with Others, 
-    FieldInit with Others, 
-    Super with Others, 
-    Ident with Others, 
-    This with Others, 
-    Select with Others, 
-    Apply with Others, 
-    New with Others, 
-    Cast with Others] {
+  trait FJLangAlg extends GFJAlg[Tree with Others, 
+                                Expr with Others, 
+                                Program with Others, 
+                                ClassDef with Others, 
+                                ValDef with Others, 
+                                ConstDef with Others, 
+                                MethodDef with Others, 
+                                FieldInit with Others, 
+                                Super with Others, 
+                                Ident with Others, 
+                                This with Others, 
+                                Select with Others, 
+                                Apply with Others, 
+                                New with Others, 
+                                Cast with Others] {
 
 
 
-    val a = FJAlgAST
-    val b = FJNamer
-    val c = new FJAnalyzer(b)
-    val d = new FJTyper(b)
-    val e = FJEval
-    val f = FJAlgDebug
+    val a: FJAlgAST = FJAlgAST
+    val b: FJNamer = FJNamer
+    val c: FJAnalyzers = new FJAnalyzer(b)
+    val d: FJTypers = new FJTyper(b)
+    val e: FJEval = FJEval
+    val f: FJAlgDebug = FJAlgDebug
 
 
     def Program(cs: List[ClassDef with Others], 

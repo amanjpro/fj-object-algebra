@@ -30,7 +30,7 @@ import fj.namer._
 trait FJAnalyzers extends FJAlg[Analyzer with Tree] {
   val namer: FJNamer
 
-  val context: TypeContext = namer.context
+  lazy val context: TypeContext = namer.context
 
   val nodef = UseSymbol(NoSymbol)
 

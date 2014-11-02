@@ -76,25 +76,28 @@ trait ValDef extends Tree {
 
 
 trait Expr extends Tree {
-  type S = UseSymbol
 }
 
 trait This extends Expr {
+  type S = UseSymbol
   override def toString = "this"
 }
 
 trait Ident extends Expr {
+  type S = UseSymbol
   val name: String
   override def toString = s"${name}"
 }
 
 trait Select extends Expr {
+  type S = UseSymbol
   val s: Expr
   val m: String
   override def toString = s"${s}.${m}"
 }
 
 trait Apply extends Expr {
+  type S = UseSymbol
   val expr: Expr
   val m: String
   val args: List[Expr] 
@@ -102,12 +105,14 @@ trait Apply extends Expr {
 }
 
 trait New extends Expr {
+  type S = UseSymbol
   val id: Ident
   val args: List[Expr]
   override def toString = s"new ${id}${args}"
 }
 
 trait Cast extends Expr {
+  type S = UseSymbol
   val id: Ident
   val expr: Expr
   override def toString = s"(${id}) ${expr}"

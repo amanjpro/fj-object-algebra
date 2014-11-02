@@ -10,7 +10,7 @@ import fj.namer._
 
 trait FJTypers extends FJAlg[TypeCheck with Tree] {
   val namer: FJNamer
-  val context: TypeContext = namer.context
+  lazy val context: TypeContext = namer.context
 
   import Names._
 

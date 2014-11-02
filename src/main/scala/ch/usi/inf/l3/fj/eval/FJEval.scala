@@ -66,7 +66,7 @@ trait FJEval extends FJAlg[Eval with Tree] {
       def eval(env: Store): (Value, Store) = {
         su.eval(env)
         val (r, env2) = evalList(finit, env)
-        (ObjectValue(sym, env), env)
+        (ObjectValue(sym, env2), env2)
       }
       def index: Unit = sym.owner match {
         case o: ClassSymbol =>
@@ -84,7 +84,9 @@ trait FJEval extends FJAlg[Eval with Tree] {
           rhs: Eval with Tree, po: Position,
           sym: UseSymbol): Eval with Tree = {
     new Eval with Tree {
-      def eval(env: Store): (Value, Store) = (NoValue, env)
+      def eval(env: Store): (Value, Store) = {
+        rhs.eval(env)
+      }
       val symbol: UseSymbol = sym
       def index: Unit = ()
       type S = UseSymbol
@@ -152,7 +154,9 @@ trait FJEval extends FJAlg[Eval with Tree] {
 
   def Ident(name: String, po: Position, sym: UseSymbol): Eval with Tree  = {
     new Eval with Tree {
-      def eval(env: Store): (Value, Store) = (env.lookup(symbol), env)
+      def eval(env: Store): (Value, Store) = {
+        (env.lookup(symbol), env)
+      }
       val symbol: UseSymbol = sym
       type S = UseSymbol
       def index: Unit = ()
@@ -183,11 +187,12 @@ trait FJEval extends FJAlg[Eval with Tree] {
       def eval(env: Store): (Value, Store) = {
         val (_, senv) = expr.eval(env)
         val senv2 = senv.enter
-        val (vargs, _) = evalList(args, env)
+        val (vargs, _) = evalList(args, senv2)
         val vpzip = symbol.tpe match {
           case t: MethodType => 
             t.params.zip(vargs)
-          case _ => Nil
+          case _ => 
+            Nil
         }
         symbol.owner match {
           case o: ClassSymbol => 
@@ -195,11 +200,14 @@ trait FJEval extends FJAlg[Eval with Tree] {
             symbol.uses match {
               case ms : TermSymbol => 
                 val meval = ceval(ms)
-                val (v, _) = meval.eval(senv2.put(vpzip))
-                (v, env)
-              case _ => (NoValue, env)
+                val senv3 = senv2.put(vpzip)
+                val (v, _) = meval.eval(senv3)
+                (v, senv2)
+              case _ => 
+                (NoValue, env)
             }
-          case _ => (NoValue, env)
+          case _ => 
+            (NoValue, env)
         }
       }
       val pos: Position = po
@@ -215,26 +223,23 @@ trait FJEval extends FJAlg[Eval with Tree] {
             sym: UseSymbol): Eval with Tree = {
     new Eval with Tree {
       def eval(env: Store): (Value, Store) = {
-        val env2 = new Store()
-        val (vargs, _) = evalList(args, env)
-        val vpzip = symbol.tpe match {
-          case t: MethodType => 
-            t.params.zip(vargs)
-          case _ => Nil
-        }
-        symbol.tpe match {
-          case MethodType(r, _, _) =>
-            r match {
-              case UseSymbol(ts: ClassSymbol) =>
-                val ceval = bank(ts)
-                symbol.uses match {
-                  case ms : TermSymbol => 
-                    val meval = ceval(ms)
-                    val env3 = env2.put(vpzip)
-                    val (v, _) = meval.eval(env3)
-                    (v, env)
-                  case _ => (NoValue, env)
+        (symbol.uses.tpe, symbol.uses) match {
+          case (ts: TType, cs: ClassSymbol) =>
+            val ceval = bank(cs)
+            val mso = ts.method(Names.CONSTRUCTOR)
+            mso match {
+              case Some(ms) => 
+                val env2 = new Store()
+                val (vargs, _) = evalList(args, env)
+                val vpzip = ms.tpe match {
+                  case t: MethodType => 
+                    t.params.zip(vargs)
+                  case _ => Nil
                 }
+                val meval = ceval(ms)
+                val env3 = env2.put(vpzip)
+                val (v, env4) = meval.eval(env3)
+                (v, env4)
               case _ => 
                 (NoValue, env)
             }

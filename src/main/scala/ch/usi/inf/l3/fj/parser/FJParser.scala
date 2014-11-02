@@ -5,24 +5,47 @@ import ch.usi.inf.l3._
 import elang.ast.{Position, NoPosition}
 import elang.namer._
 import elang.analyzer._
-import elang.typecheck._
 import elang.eval._
 import fj.ast._
 import fj.lang._
 import scala.util.parsing.combinator._
+import scala.util.matching.Regex
 import scala.language.postfixOps
 import scala.util.parsing.input.CharArrayReader.EofCh
 
-// import token.input.CharArrayReader.EofCh
 
 
 
 
-trait FJParser extends JavaTokenParsers {
+trait FJParser extends JavaTokenParsers with Parsers  {
 
-  val compiler: FJCompilerTrait
-  val alg = compiler.FJLangAlgObject
+  type CompilerType <: FJCompilerTrait
+  val compiler: CompilerType
+  val alg: compiler.FJLangAlg = compiler.FJLangAlgObject
   type Others = compiler.Others
+
+
+
+  // This combinator should be able to get pos, lemme see 
+  // if this is the case
+  def ^^@[U, T](p: Parser[T],
+      f: ((Int, Int), T) => U): Parser[U] = Parser { in =>
+    val source = in.source
+    val offset = in.offset
+    val start = handleWhiteSpace(source, offset)
+    val inwo = in.drop(start - offset)
+    p(inwo) match {
+      case Success(t, in1) =>
+        {
+          var a = 3
+          var b = 4
+          a = inwo.pos.line
+          b = inwo.pos.column
+          Success(f((a, b), t), in1)
+        }
+      case ns: NoSuccess => ns
+    }
+  } 
 
   val pos: Position = NoPosition
 
@@ -56,11 +79,11 @@ trait FJParser extends JavaTokenParsers {
           case None => alg.ConstDef(x._1._1._1._1, Nil, 
                                     alg.Super(Nil, pos, UseSymbol(NoSymbol)),
                                     Nil,
-                                    pos, new TermSymbol)
+                                    pos, TermSymbol())
           case Some(y) => y
         }
         alg.ClassDef(x._1._1._1._1.name, x._1._1._1._2, x._1._1._2, cnstr, 
-                  x._2, pos, new ClassSymbol)
+                  x._2, pos, ClassSymbol())
     })
   }
 
@@ -78,7 +101,7 @@ trait FJParser extends JavaTokenParsers {
     (id<~wso<~"("<~wso)~(params<~wso<~")"<~wso<~"{"<~wso)~(cbody<~wso<~"}")^^({
       case x => 
         alg.ConstDef(x._1._1, x._1._2, x._2._1, x._2._2, 
-              pos, new TermSymbol)
+              pos, TermSymbol())
     })
 
   lazy val methods: Parser[List[MethodDef with Others]] = rep(method)
@@ -87,11 +110,11 @@ trait FJParser extends JavaTokenParsers {
             wso<~"return"<~ws)~(expr<~wso<~";"<~wso<~"}")^^({
       case x => 
         alg.MethodDef(x._1._1._1, x._1._1._2.name, x._1._2, x._2,
-          pos, new TermSymbol)
+          pos, TermSymbol())
     })
 
   lazy val param: Parser[ValDef with Others] = (id<~ws)~id^^({
-    case t => alg.ValDef(t._1, t._2.name, pos, new TermSymbol)
+    case t => alg.ValDef(t._1, t._2.name, pos, TermSymbol())
   })
 
   lazy val params: Parser[List[ValDef with Others]] = repsep(param<~wso, ",")
@@ -110,12 +133,12 @@ trait FJParser extends JavaTokenParsers {
       case x => alg.FieldInit(x._1, x._2, pos, UseSymbol(NoSymbol))
     })
 
-  lazy val expr: Parser[Expr with Others] = 
+  def expr: Parser[Expr with Others] = 
     (ths | newTree | cast | id)~select~apply^^({
       case x =>
         (x._1._1, x._1._2, x._2) match {
           case (e, None, None) => e
-          case (e, None, _) => throw new Exception("Unexpected token (")
+          case (e, None, _) => throw new Exception("unexpected token (")
           case (e, Some(s), None) => 
             alg.Select(e, s.name, pos, UseSymbol(NoSymbol))
           case (e, Some(s), Some(as)) => 
@@ -154,6 +177,7 @@ trait FJParser extends JavaTokenParsers {
 
 
 object FJCompiler {
+  import elang.typecheck._
   def main(args: Array[String]): Unit = {
     val sources = List("/Users/amanj/Documents/PhD/MyWork/Programming/ScalaFJ/Test.fj").toList.map((x) => {
       scala.io.Source.fromFile(x).mkString.map((x) => x match {
@@ -164,7 +188,9 @@ object FJCompiler {
 
     val program = new { 
       val compiler = new FJCompilerTrait{}
-    } with FJParser{}.startParsing(sources)
+    } with FJParser{
+      type CompilerType = FJCompilerTrait
+    }.startParsing(sources)
     program.nameIt(NoSymbol)
     program.bind(NoSymbol)
     val r = program.check
