@@ -50,7 +50,9 @@ class Store private(env: Map[Symbol, Value],
 
   def exit: Option[Store] = outer
 
-  override def toString: String = (env.map(_._2).mkString("(", ", ", ")"))
+
+  override def toString: String = (env.map((x) => 
+          s"${x._1} -> ${x._2}").mkString("(", ", ", ")"))
 }
 
 

@@ -55,9 +55,11 @@ case object ObjectType extends TType {
   def overrideCheck(mtpe: MethodType): Result = Success
 }
 
-case class ClassType(name: String, var parent: UseSymbol, 
-                     vars: List[TermSymbol], 
-                     methods: List[TermSymbol]) extends TType {
+trait ClassType extends TType {
+  val name: String 
+  var parent: UseSymbol
+  val vars: List[TermSymbol]
+  val methods: List[TermSymbol]
   def isSubtypeOf(other: TType): Boolean = {
     val p = parent.tpe 
     if(other == this || other == p || other == ObjectType) true
@@ -116,16 +118,83 @@ case class ClassType(name: String, var parent: UseSymbol,
       case _ => Failure(s"${parent} is not a proper type")
     }
   }
+
+  override def toString = s"class type ${name}"
+  override def hashCode = 43 * (name.hashCode + parent.hashCode)
+  override def equals(other: Any) = (other != null) && (other match {
+    case c: ClassType =>
+      c.name == name && c.parent == parent
+    case _ => false
+  })
 }
 
-case class VarType(name: String, tpe: Symbol) extends Type
-case class MethodType(ret: Symbol, name: String, 
-        params: List[Symbol]) extends Type {
-  def param(name: String): Option[Symbol] = {
-    params.filter(_.name == name).headOption 
+object ClassType {
+  def apply(n: String, p: UseSymbol, vs: List[TermSymbol], 
+            ms: List[TermSymbol]): ClassType = {
+    new ClassType {
+      val name = n
+      var parent = p
+      val vars = vs
+      val methods = ms
+    }
+  }
+  def unapply(ct: ClassType): Option[(String, UseSymbol, List[TermSymbol],
+                                      List[TermSymbol])] = {
+    Some(ct.name, ct.parent, ct.vars, ct.methods)
   }
 }
 
+trait VarType extends Type {
+  val name: String
+  val tpe: Symbol
+  override def toString = s"variable type ${name}"
+  override def hashCode = 31 * (name.hashCode + tpe.hashCode)
+  override def equals(other: Any) = (other != null) && (other match {
+    case c: VarType =>
+      c.name == name && c.tpe == tpe 
+    case _ => false
+  })
+}
+
+object VarType{
+  def apply(n: String, t: Symbol): VarType = {
+    new VarType {
+      val name = n
+      val tpe = t
+    }
+  }
+  def unapply(vt: VarType): Option[(String, Symbol)] = {
+    Some(vt.name, vt.tpe)
+  }
+}
+trait MethodType extends Type {
+  val name: String
+  val ret: Symbol
+  val params: List[Symbol]
+  def param(name: String): Option[Symbol] = {
+    params.filter(_.name == name).headOption 
+  }
+  override def toString = s"method type ${name}"
+  override def hashCode = 73 * (name.hashCode + params.hashCode)
+  override def equals(other: Any) = (other != null) && (other match {
+    case c: MethodType =>
+      c.name == name && c.ret == ret && c.params == params
+    case _ => false
+  })
+}
+
+object MethodType {
+  def apply(r: Symbol, n: String, ps: List[Symbol]): MethodType = {
+    new MethodType {
+      val ret = r
+      val name = n
+      val params = ps
+    }
+  }
+  def unapply(mt: MethodType): Option[(Symbol, String, List[Symbol])] = {
+    Some(mt.ret, mt.name, mt.params)
+  }
+}
 case class TypeContext private (private var context: Map[String, Symbol]){
 
   private var duplicates: List[Symbol] = Nil
