@@ -40,7 +40,11 @@ trait FJExprParser extends FJParser {
     floatingPointNumber^^(x => alg.Literal(x.toDouble, pos, LitSymbol()))
 
 
-  override def expr: Parser[FExpr] = term1
+  override def expr: Parser[FExpr] = term1 ~ rep(or) ^^ {
+    case a~b => b.foldLeft(a)((z, y) => {
+      y(z)
+    })
+  }
 
   lazy val term1: Parser[FExpr] = term2 ~ rep (and)  ^^ {
     case a~b => b.foldLeft(a)((z, y) => {
@@ -137,7 +141,13 @@ trait FJExprParser extends FJParser {
 
 object FJExprCompiler {
   def main(args: Array[String]): Unit = {
-    val sources = List("/Users/amanj/Documents/PhD/MyWork/Programming/ScalaFJ/Test.fj").toList.map((x) => {
+    val files = args.size match {
+      case 0 => 
+        List("/Users/amanj/Documents/PhD/MyWork/Programming/ScalaFJ/Test.fj")
+      case _ => 
+        args.toList
+    }
+    val sources = files.toList.map((x) => {
       scala.io.Source.fromFile(x).mkString.map((x) => x match {
         case '\t' | '\r' => ' '
         case _ => x

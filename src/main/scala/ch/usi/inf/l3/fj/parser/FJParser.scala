@@ -179,7 +179,13 @@ trait FJParser extends JavaTokenParsers with Parsers  {
 object FJCompiler {
   import elang.typecheck._
   def main(args: Array[String]): Unit = {
-    val sources = List("/Users/amanj/Documents/PhD/MyWork/Programming/ScalaFJ/Test.fj").toList.map((x) => {
+    val files = args.size match {
+      case 0 => 
+        List("/Users/amanj/Documents/PhD/MyWork/Programming/ScalaFJ/Test.fj")
+      case _ => 
+        args.toList
+    }
+    val sources = files.toList.map((x) => {
       scala.io.Source.fromFile(x).mkString.map((x) => x match {
         case '\t' | '\r' => ' '
         case _ => x
