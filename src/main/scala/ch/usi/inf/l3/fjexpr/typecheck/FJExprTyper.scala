@@ -46,9 +46,9 @@ trait FJExprTypers extends FJExprAlg[TypeCheck with Tree] with FJTypers {
 
   def BinOp(lhs: TypeCheck with Tree, op: Bop, 
       rhs: TypeCheck with Tree, po: Position, 
-      sym: LitSymbol): TypeCheck with Tree = {
+      sym: UseSymbol): TypeCheck with Tree = {
     new TypeCheck with Tree {
-      type S = LitSymbol
+      type S = UseSymbol
       def check: Result = {
         val rl = lhs.check
         val rr = rhs.check
@@ -65,9 +65,9 @@ trait FJExprTypers extends FJExprAlg[TypeCheck with Tree] with FJTypers {
   }
 
   def UniOp(op: Uop, expr: TypeCheck with Tree, 
-      po: Position, sym: LitSymbol): TypeCheck with Tree = {
+      po: Position, sym: UseSymbol): TypeCheck with Tree = {
     new TypeCheck with Tree {
-      type S = LitSymbol
+      type S = UseSymbol
       def check: Result = {
         val re = expr.check
         val rt = symbol.tpe match {
@@ -82,46 +82,43 @@ trait FJExprTypers extends FJExprAlg[TypeCheck with Tree] with FJTypers {
     }
   }
 
-  def Literal(v: Int, po: Position, sym: LitSymbol): TypeCheck with Tree = {
+  def Literal(v: Int, po: Position): TypeCheck with Tree = {
     new TypeCheck with Tree {
       type S = LitSymbol
       def check: Result = Success
-      val symbol = sym
+      val symbol = IntSymbol
       val pos: Position = po
     }
   }
-  def Literal(v: Double, po: Position, 
-      sym: LitSymbol): TypeCheck with Tree = {
+  def Literal(v: Double, po: Position): TypeCheck with Tree = {
     new TypeCheck with Tree {
       type S = LitSymbol
       def check: Result = Success
-      val symbol = sym
+      val symbol = FloatSymbol
       val pos: Position = po
     }
   }
-  def Literal(v: Boolean, po: Position, 
-      sym: LitSymbol): TypeCheck with Tree = {
+  def Literal(v: Boolean, po: Position): TypeCheck with Tree = {
    new TypeCheck with Tree {
       type S = LitSymbol
       def check: Result = Success
-      val symbol = sym
+      val symbol = BoolSymbol
       val pos: Position = po
     }
   }
-  def Literal(v: String, po: Position, 
-      sym: LitSymbol): TypeCheck with Tree = {
+  def Literal(v: String, po: Position): TypeCheck with Tree = {
     new TypeCheck with Tree {
       type S = LitSymbol
       def check: Result = Success
-      val symbol = sym
+      val symbol = StrSymbol
       val pos: Position = po
     }
   }
-  def NullLiteral(po: Position, sym: LitSymbol): TypeCheck with Tree = {
+  def NullLiteral(po: Position): TypeCheck with Tree = {
     new TypeCheck with Tree {
       type S = LitSymbol
       def check: Result = Success
-      val symbol = sym
+      val symbol = NullSymbol
       val pos: Position = po
     }
   }

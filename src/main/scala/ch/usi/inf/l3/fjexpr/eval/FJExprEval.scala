@@ -22,7 +22,7 @@ case object NullValue extends Value
 trait FJExprEval extends FJExprAlg[Eval with Tree] with FJEval {
 
   def BinOp(lhs: Eval with Tree, op: Bop, rhs: Eval with Tree, 
-        po: Position, sym: LitSymbol): Eval with Tree = {
+        po: Position, sym: UseSymbol): Eval with Tree = {
     new Eval with Tree {
       def eval(env: Store): (Value, Store) = {
         val (v1, env2) = lhs.eval(env)
@@ -84,12 +84,12 @@ trait FJExprEval extends FJExprAlg[Eval with Tree] with FJEval {
       val symbol = sym
       def index: Unit = ()
       val pos: Position = po
-      type S = LitSymbol
+      type S = UseSymbol
     }
   }
 
   def UniOp(op: Uop, expr: Eval with Tree, 
-        po: Position, sym: LitSymbol): Eval with Tree = {
+        po: Position, sym: UseSymbol): Eval with Tree = {
     new Eval with Tree {
       def eval(env: Store): (Value, Store) = {
         val (v, env2) = expr.eval(env)
@@ -106,50 +106,50 @@ trait FJExprEval extends FJExprAlg[Eval with Tree] with FJEval {
       val symbol = sym
       def index: Unit = ()
       val pos: Position = po
-      type S = LitSymbol
+      type S = UseSymbol
     }
   }
 
-  def Literal(v: Int, po: Position, sym: LitSymbol): Eval with Tree = {
+  def Literal(v: Int, po: Position): Eval with Tree = {
     new Eval with Tree {
       def eval(env: Store): (Value, Store) = (IntValue(v), env)
-      val symbol = sym
+      val symbol = IntSymbol
       def index: Unit = ()
       val pos: Position = po
       type S = LitSymbol
     }
   }
-  def Literal(v: Double, po: Position, sym: LitSymbol): Eval with Tree = {
+  def Literal(v: Double, po: Position): Eval with Tree = {
     new Eval with Tree {
       def eval(env: Store): (Value, Store) = (FloatValue(v), env)
-      val symbol = sym
+      val symbol = FloatSymbol
       def index: Unit = ()
       val pos: Position = po
       type S = LitSymbol
     }
   }
-  def Literal(v: Boolean, po: Position, sym: LitSymbol): Eval with Tree = {
+  def Literal(v: Boolean, po: Position): Eval with Tree = {
     new Eval with Tree {
       def eval(env: Store): (Value, Store) = (BoolValue(v), env)
-      val symbol = sym
+      val symbol = BoolSymbol
       def index: Unit = ()
       val pos: Position = po
       type S = LitSymbol
     }
   }
-  def Literal(v: String, po: Position, sym: LitSymbol): Eval with Tree = {
+  def Literal(v: String, po: Position): Eval with Tree = {
     new Eval with Tree {
       def eval(env: Store): (Value, Store) = (StringValue(v), env)
-      val symbol = sym
+      val symbol = StrSymbol
       def index: Unit = ()
       val pos: Position = po
       type S = LitSymbol
     }
   }
-  def NullLiteral(po: Position, sym: LitSymbol): Eval with Tree = {
+  def NullLiteral(po: Position): Eval with Tree = {
     new Eval with Tree {
       def eval(env: Store): (Value, Store) = (NullValue, env)
-      val symbol = sym
+      val symbol = NullSymbol
       def index: Unit = ()
       val pos: Position = po
       type S = LitSymbol

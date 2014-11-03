@@ -13,10 +13,9 @@ import fjexpr.typecheck._
 
 
 trait LitSymbol extends Symbol {
-  def enclosingClass: Option[ClassSymbol] = owner match {
-    case x: ClassSymbol => Some(x)
-    case _ => owner.owner.enclosingClass
-  }
+  def enclosingClass: Option[ClassSymbol] = None 
+  def owner = NoSymbol
+  def owner_=(o: Symbol) = ???
   override def toString: String = "literal symbol"
   override def hashCode: Int = tpe.hashCode
   override def equals(other: Any) = other != null && (
@@ -27,25 +26,47 @@ trait LitSymbol extends Symbol {
   )
 }
 
-object LitSymbol {
-  def apply(): LitSymbol = apply(null, null)
-  def apply(t: PrimitiveType, o: Symbol): LitSymbol = {
-    new LitSymbol {
-      var name = "Lit Symbol"
-      var owner = o
-      var tpe: Type = t
-    }
-  }
-  def unapply(l: LitSymbol): Option[Type] = {
-    Some(l.tpe)
-  }
+case object FloatSymbol extends LitSymbol {
+  def tpe: Type = FloatType
+  def tpe_=(t: Type): Unit = ???
+  def name = "Float Symbol"
+  def name_=(n: String) = ???
 }
+
+case object IntSymbol extends LitSymbol {
+  def tpe: Type = IntType
+  def tpe_=(t: Type): Unit = ???
+  def name = "Int Symbol"
+  def name_=(n: String) = ???
+}
+
+case object BoolSymbol extends LitSymbol {
+  def tpe: Type = BoolType
+  def tpe_=(t: Type): Unit = ???
+  def name = "Bool Symbol"
+  def name_=(n: String) = ???
+}
+
+case object StrSymbol extends LitSymbol {
+  def tpe: Type = StrType
+  def tpe_=(t: Type): Unit = ???
+  def name = "String Symbol"
+  def name_=(n: String) = ???
+}
+
+case object NullSymbol extends LitSymbol {
+  def tpe: Type = NullType
+  def tpe_=(t: Type): Unit = ???
+  def name = "Null Symbol"
+  def name_=(n: String) = ???
+}
+
 trait FJExprNamer extends FJExprAlg[Namer with Tree] 
                   with FJNamer {
 
 
   def BinOp(l: Namer with Tree, o: Bop, r: Namer with Tree,
-                    p: Position, s: LitSymbol): Namer with Tree = {
+                    p: Position, s: UseSymbol): Namer with Tree = {
     new Namer with Tree {
       type S = Symbol
       def nameIt(owner: Symbol): Unit = ()
@@ -56,7 +77,7 @@ trait FJExprNamer extends FJExprAlg[Namer with Tree]
 
 
   def UniOp(op: Uop, expr: Namer with Tree, p: Position, 
-          s: LitSymbol): Namer with Tree = {
+          s: UseSymbol): Namer with Tree = {
     new Namer with Tree {
       type S = Symbol
       def nameIt(owner: Symbol): Unit = ()
@@ -66,52 +87,58 @@ trait FJExprNamer extends FJExprAlg[Namer with Tree]
   }
 
 
-  def Literal(v: Int, p: Position, s: LitSymbol): Namer with Tree = {
+  def Literal(v: Int, p: Position): Namer with Tree = {
     new Namer with Tree {
       type S = Symbol
       def nameIt(owner: Symbol): Unit = ()
-      val symbol: Symbol = s
+      val symbol: Symbol = IntSymbol
       val pos: Position = p
     }
   }
 
-  def Literal(v: Double, p: Position, s: LitSymbol): Namer with Tree = {
+  def Literal(v: Double, p: Position): Namer with Tree = {
     new Namer with Tree {
       type S = Symbol
       def nameIt(owner: Symbol): Unit = ()
-      val symbol: Symbol = s
+      val symbol: Symbol = FloatSymbol
       val pos: Position = p
     }
   }
 
-  def Literal(v: Boolean, p: Position, s: LitSymbol): Namer with Tree = {
+  def Literal(v: Boolean, p: Position): Namer with Tree = {
     new Namer with Tree {
       type S = Symbol
       def nameIt(owner: Symbol): Unit = ()
-      val symbol: Symbol = s
+      val symbol: Symbol = BoolSymbol
       val pos: Position = p
     }
   }
 
-  def Literal(v: String, p: Position, s: LitSymbol): Namer with Tree = {
+  def Literal(v: String, p: Position): Namer with Tree = {
     new Namer with Tree {
       type S = Symbol
       def nameIt(owner: Symbol): Unit = ()
-      val symbol: Symbol = s
+      val symbol: Symbol = StrSymbol
       val pos: Position = p
     }
   }
 
-  def NullLiteral(p: Position, s: LitSymbol): Namer with Tree = {
+  def NullLiteral(p: Position): Namer with Tree = {
     new Namer with Tree {
       type S = Symbol
       def nameIt(owner: Symbol): Unit = ()
-      val symbol: Symbol = s
+      val symbol: Symbol = NullSymbol
       val pos: Position = p
     }
   }
 }
 
 object FJExprNamer extends FJExprNamer {
+  private val primitives = List(("int", IntSymbol),
+                                ("boolean", BoolSymbol),
+                                ("double", FloatSymbol),
+                                ("null", NullSymbol),
+                                ("String", StrSymbol))
   val context: TypeContext = new TypeContext
+  primitives.map((x) => context.put(x._1, x._2))
 }
