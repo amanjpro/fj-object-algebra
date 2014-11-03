@@ -28,16 +28,16 @@ trait FJExprParser extends FJParser {
 
   
   lazy val nl: Parser[Literal with Others] = 
-    "null"^^(_ => alg.NullLiteral(pos, LitSymbol()))
+    "null"^^(_ => alg.NullLiteral(pos))
   lazy val blit: Parser[Literal with Others] = 
     ("false" | "true")^^((x) => 
-      alg.Literal(x.toBoolean, pos, LitSymbol()))
+      alg.Literal(x.toBoolean, pos))
   lazy val slit: Parser[Literal with Others] = 
-    stringLiteral^^(x => alg.Literal(x, pos, LitSymbol()))
+    stringLiteral^^(x => alg.Literal(x, pos))
   lazy val ilit: Parser[Literal with Others] = 
-    decimalNumber^^(x => alg.Literal(x.toInt, pos, LitSymbol()))
+    decimalNumber^^(x => alg.Literal(x.toInt, pos))
   lazy val flit: Parser[Literal with Others] = 
-    floatingPointNumber^^(x => alg.Literal(x.toDouble, pos, LitSymbol()))
+    floatingPointNumber^^(x => alg.Literal(x.toDouble, pos))
 
 
   override def expr: Parser[FExpr] = term1 ~ rep(or) ^^ {
@@ -82,53 +82,53 @@ trait FJExprParser extends FJParser {
 
 
   lazy val or: Parser[FExpr => FBinOp] = wso~>"||"~>wso~>term1^^({
-    case y => ((x: FExpr) => alg.BinOp(y, Or, x, pos, LitSymbol()))
+    case y => ((x: FExpr) => alg.BinOp(y, Or, x, pos, UseSymbol(NoSymbol)))
   })
 
   lazy val and: Parser[FExpr => FBinOp] = wso~>"&&"~wso~>term2^^({
-    case y => ((x: FExpr) => alg.BinOp(y, And, x, pos, LitSymbol()))
+    case y => ((x: FExpr) => alg.BinOp(y, And, x, pos, UseSymbol(NoSymbol)))
   })
 
   lazy val equ: Parser[FExpr => FBinOp] = wso~>"=="~>wso~>term3^^({
-    case y => ((x: FExpr) => alg.BinOp(x, Eq, y, pos, LitSymbol()))
+    case y => ((x: FExpr) => alg.BinOp(x, Eq, y, pos, UseSymbol(NoSymbol)))
   })
   lazy val neq: Parser[FExpr => FBinOp] = wso~>"!="~>wso~>term3^^({
-    case y => ((x: FExpr) => alg.BinOp(x, Neq, y, pos, LitSymbol()))
+    case y => ((x: FExpr) => alg.BinOp(x, Neq, y, pos, UseSymbol(NoSymbol)))
   })
   lazy val gt: Parser[FExpr => FBinOp] = wso~>">"~>wso~>term4^^({
-    case y => ((x: FExpr) => alg.BinOp(x, Gt, y, pos, LitSymbol()))
+    case y => ((x: FExpr) => alg.BinOp(x, Gt, y, pos, UseSymbol(NoSymbol)))
   })
   lazy val lt: Parser[FExpr => FBinOp] = wso~>"<"~>wso~>term4^^({
-    case y => ((x: FExpr) => alg.BinOp(x, Lt, y, pos, LitSymbol()))
+    case y => ((x: FExpr) => alg.BinOp(x, Lt, y, pos, UseSymbol(NoSymbol)))
   })
   lazy val ge: Parser[FExpr => FBinOp] = wso~>">="~>wso~>term4^^({
-    case y => ((x: FExpr) => alg.BinOp(x, Geq, y, pos, LitSymbol()))
+    case y => ((x: FExpr) => alg.BinOp(x, Geq, y, pos, UseSymbol(NoSymbol)))
   })
   lazy val le: Parser[FExpr => FBinOp] = wso~>"<="~>wso~>term4^^({
-    case y => ((x: FExpr) => alg.BinOp(x, Leq, y, pos, LitSymbol()))
+    case y => ((x: FExpr) => alg.BinOp(x, Leq, y, pos, UseSymbol(NoSymbol)))
   })
   lazy val plus: Parser[FExpr => FBinOp] = wso~>"+"~>wso~>term^^({
-    case y => ((x: FExpr) => alg.BinOp(x, Add, y, pos, LitSymbol()))
+    case y => ((x: FExpr) => alg.BinOp(x, Add, y, pos, UseSymbol(NoSymbol)))
   })
   lazy val minus: Parser[FExpr => FBinOp] = wso~>"-"~>wso~>term^^({
-    case y => ((x: FExpr) => alg.BinOp(x, Sub, y, pos, LitSymbol()))
+    case y => ((x: FExpr) => alg.BinOp(x, Sub, y, pos, UseSymbol(NoSymbol)))
   })
   lazy val div: Parser[FExpr => FBinOp] = wso~>"/"~>wso~>factor^^({
-    case y => ((x: FExpr) => alg.BinOp(x, Div, y, pos, LitSymbol()))
+    case y => ((x: FExpr) => alg.BinOp(x, Div, y, pos, UseSymbol(NoSymbol)))
   })
   lazy val mul: Parser[FExpr => FBinOp] = wso~>"*"~>wso~>factor^^({
-    case y => ((x: FExpr) => alg.BinOp(x, Mul, y, pos, LitSymbol()))
+    case y => ((x: FExpr) => alg.BinOp(x, Mul, y, pos, UseSymbol(NoSymbol)))
   })
   lazy val mod: Parser[FExpr => FBinOp] = wso~>"%"~>wso~>factor^^({
-    case y => ((x: FExpr) => alg.BinOp(x, Mod, y, pos, LitSymbol()))
+    case y => ((x: FExpr) => alg.BinOp(x, Mod, y, pos, UseSymbol(NoSymbol)))
   })
 
 
   lazy val uop: Parser[UniOp with Others] = ("!" | "-" | "+")~(wso~>expr)^^({
-    case x => (x._1, x._2) match {
-      case ("!", e) => alg.UniOp(Not, e, pos, LitSymbol())
-      case ("+", e) => alg.UniOp(Posi, e, pos, LitSymbol())
-      case ("-", e) => alg.UniOp(Neg, e, pos, LitSymbol())
+    case a~b => (a, b) match {
+      case ("!", e) => alg.UniOp(Not, e, pos, UseSymbol(NoSymbol))
+      case ("+", e) => alg.UniOp(Posi, e, pos, UseSymbol(NoSymbol))
+      case ("-", e) => alg.UniOp(Neg, e, pos, UseSymbol(NoSymbol))
     }
   })
 

@@ -101,14 +101,14 @@ case object Not extends Uop {
 
 
 trait BinOp extends Expr {
-  type S = LitSymbol
+  type S = UseSymbol
   val rhs: Expr
   val lhs: Expr
   val op: Bop
 }
 
 trait UniOp extends Expr {
-  type S = LitSymbol
+  type S = UseSymbol
   val expr: Expr
   val op: Uop
 }
@@ -123,28 +123,28 @@ trait GFJExprAlg[T, E <: T, P <: T, C <: T,
                                              SE, A, N, CA] {
 
 
-  def BinOp(lhs: E, op: Bop, rhs: E, pos: Position, symbol: LitSymbol): BO
+  def BinOp(lhs: E, op: Bop, rhs: E, pos: Position, symbol: UseSymbol): BO
 
-  def UniOp(op: Uop, expr: E, pos: Position, symbol: LitSymbol): UO
+  def UniOp(op: Uop, expr: E, pos: Position, symbol: UseSymbol): UO
 
-  def Literal(v: Int, pos: Position, symbol: LitSymbol): LI
-  def Literal(v: Double, pos: Position, symbol: LitSymbol): LI
-  def Literal(v: Boolean, pos: Position, symbol: LitSymbol): LI
-  def Literal(v: String, pos: Position, symbol: LitSymbol): LI
-  def NullLiteral(pos: Position, symbol: LitSymbol): LI
+  def Literal(v: Int, pos: Position): LI
+  def Literal(v: Double, pos: Position): LI
+  def Literal(v: Boolean, pos: Position): LI
+  def Literal(v: String, pos: Position): LI
+  def NullLiteral(pos: Position): LI
 }
 
 trait FJExprAlg[E] extends GFJExprAlg[E, E, E, E, E, E, E, E, E,
                                       E, E, E, E, E, E, E, E, E] {
-  def BinOp(lhs: E, op: Bop, rhs: E, pos: Position, symbol: LitSymbol): E
+  def BinOp(lhs: E, op: Bop, rhs: E, pos: Position, symbol: UseSymbol): E
 
-  def UniOp(op: Uop, expr: E, pos: Position, symbol: LitSymbol): E
+  def UniOp(op: Uop, expr: E, pos: Position, symbol: UseSymbol): E
 
-  def Literal(v: Int, pos: Position, symbol: LitSymbol): E
-  def Literal(v: Double, pos: Position, symbol: LitSymbol): E
-  def Literal(v: Boolean, pos: Position, symbol: LitSymbol): E
-  def Literal(v: String, pos: Position, symbol: LitSymbol): E
-  def NullLiteral(pos: Position, symbol: LitSymbol): E
+  def Literal(v: Int, pos: Position): E
+  def Literal(v: Double, pos: Position): E
+  def Literal(v: Boolean, pos: Position): E
+  def Literal(v: String, pos: Position): E
+  def NullLiteral(pos: Position): E
 }
 
 trait FJExprAlgAST extends GFJExprAlg[Tree, Expr, Program, ClassDef,
@@ -154,7 +154,7 @@ trait FJExprAlgAST extends GFJExprAlg[Tree, Expr, Program, ClassDef,
                              BinOp, UniOp, Literal] 
                    with FJAlgAST {
 
-  def BinOp(l: Expr, o: Bop, r: Expr, p: Position, sym: LitSymbol): BinOp = {
+  def BinOp(l: Expr, o: Bop, r: Expr, p: Position, sym: UseSymbol): BinOp = {
     new BinOp {
       val lhs = l
       val rhs = r
@@ -164,7 +164,7 @@ trait FJExprAlgAST extends GFJExprAlg[Tree, Expr, Program, ClassDef,
     }
   }
 
-  def UniOp(o: Uop, e: Expr, p: Position, sym: LitSymbol): UniOp = {
+  def UniOp(o: Uop, e: Expr, p: Position, sym: UseSymbol): UniOp = {
     new UniOp {
       val op = o
       val expr = e
@@ -173,47 +173,47 @@ trait FJExprAlgAST extends GFJExprAlg[Tree, Expr, Program, ClassDef,
     }
   }
 
-  def Literal(va: Int, p: Position, sym: LitSymbol): Literal = {
+  def Literal(va: Int, p: Position): Literal = {
     new {
       val v = IntConst(va)
     } with Literal {
       val pos = p
-      val symbol = sym
+      val symbol = IntSymbol
     }
   }
-  def Literal(va: Double, p: Position, sym: LitSymbol): Literal = {
+  def Literal(va: Double, p: Position): Literal = {
     new {
       val v = FloatConst(va)
     } with Literal {
       val pos = p
-      val symbol = sym
+      val symbol = FloatSymbol
     }
   }
 
-  def Literal(va: Boolean, p: Position, sym: LitSymbol): Literal = {
+  def Literal(va: Boolean, p: Position): Literal = {
     new {
       val v = BoolConst(va)
     } with Literal {
       val pos = p
-      val symbol = sym
+      val symbol = BoolSymbol
     }
   }
 
-  def Literal(va: String, p: Position, sym: LitSymbol): Literal = {
+  def Literal(va: String, p: Position): Literal = {
     new {
       val v = StrConst(va)
     } with Literal {
       val pos = p
-      val symbol = sym
+      val symbol = StrSymbol
     }
   }
 
-  def NullLiteral(p: Position, sym: LitSymbol): Literal = {
+  def NullLiteral(p: Position): Literal = {
     new {
       val v = NullConst
     } with Literal {
       val pos = p
-      val symbol = sym
+      val symbol = NullSymbol
     }
   }
 
