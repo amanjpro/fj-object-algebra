@@ -68,22 +68,21 @@ trait FJParser extends JavaTokenParsers with Parsers  {
   }
 
   lazy val program: Parser[Program with Others] = clazzes~expr^^({
-    case x => alg.Program(x._1, x._2)
+    case a~b => alg.Program(a, b)
   })
   lazy val clazzes: Parser[List[ClassDef with Others]] = rep(clazz)
   lazy val clazz: Parser[ClassDef with Others] = {
     ("class"~>ws~>id<~ws)~(parent<~wso<~"{"<~wso)~
         (fields<~wso)~(const<~wso)~(methods<~wso<~"}")^^({
-      case x =>
-        val cnstr = x._1._2 match {
-          case None => alg.ConstDef(x._1._1._1._1, Nil, 
+      case a~b~c~d~e =>
+        val cnstr = d match {
+          case None => alg.ConstDef(a, Nil, 
                                     alg.Super(Nil, pos, UseSymbol(NoSymbol)),
                                     Nil,
                                     pos, TermSymbol())
           case Some(y) => y
         }
-        alg.ClassDef(x._1._1._1._1.name, x._1._1._1._2, x._1._1._2, cnstr, 
-                  x._2, pos, ClassSymbol())
+        alg.ClassDef(a.name, b, c, cnstr, e, pos, ClassSymbol())
     })
   }
 
@@ -99,18 +98,16 @@ trait FJParser extends JavaTokenParsers with Parsers  {
     
   lazy val const2: Parser[ConstDef with Others] = 
     (id<~wso<~"("<~wso)~(params<~wso<~")"<~wso<~"{"<~wso)~(cbody<~wso<~"}")^^({
-      case x => 
-        alg.ConstDef(x._1._1, x._1._2, x._2._1, x._2._2, 
-              pos, TermSymbol())
+      case a~b~c => 
+        alg.ConstDef(a, b, c._1, c._2, pos, TermSymbol())
     })
 
   lazy val methods: Parser[List[MethodDef with Others]] = rep(method)
   lazy val method: Parser[MethodDef with Others] = 
     (id<~ws)~(id<~"("<~wso)~(params<~wso<~")"<~wso<~"{"<~
             wso<~"return"<~ws)~(expr<~wso<~";"<~wso<~"}")^^({
-      case x => 
-        alg.MethodDef(x._1._1._1, x._1._1._2.name, x._1._2, x._2,
-          pos, TermSymbol())
+      case a~b~c~d => 
+        alg.MethodDef(a, b.name, c, d, pos, TermSymbol())
     })
 
   lazy val param: Parser[ValDef with Others] = (id<~ws)~id^^({
@@ -121,7 +118,7 @@ trait FJParser extends JavaTokenParsers with Parsers  {
 
   lazy val cbody: Parser[(Super with Others, List[FieldInit with Others])] = 
     ("super"~>wso~>args<~wso<~";"~wso)~(rep(finit))^^({
-      case x => (alg.Super(x._1, pos, UseSymbol(NoSymbol)), x._2)
+      case a~b => (alg.Super(a, pos, UseSymbol(NoSymbol)), b)
     })
 
   lazy val args: Parser[List[Expr with Others]] = 
@@ -130,13 +127,13 @@ trait FJParser extends JavaTokenParsers with Parsers  {
     })
   lazy val finit: Parser[FieldInit with Others] = 
     ("this"~>"."~>id<~wso<~"="<~wso)~(expr<~wso<~";")^^({
-      case x => alg.FieldInit(x._1, x._2, pos, UseSymbol(NoSymbol))
+      case a~b => alg.FieldInit(a, b, pos, UseSymbol(NoSymbol))
     })
 
   def expr: Parser[Expr with Others] = 
     (ths | newTree | cast | id)~select~apply^^({
-      case x =>
-        (x._1._1, x._1._2, x._2) match {
+      case a~b~c =>
+        (a, b, c) match {
           case (e, None, None) => e
           case (e, None, _) => throw new Exception("unexpected token (")
           case (e, Some(s), None) => 
@@ -153,12 +150,12 @@ trait FJParser extends JavaTokenParsers with Parsers  {
 
   lazy val cast: Parser[Cast with Others] = 
     ("("~>wso~>id<~wso<~")"<~wso)~expr^^({
-      case x => alg.Cast(x._1, x._2, pos, UseSymbol(NoSymbol))
+      case a~b => alg.Cast(a, b, pos, UseSymbol(NoSymbol))
     })
                           
 
   lazy val newTree: Parser[New with Others] = ("new"~>ws~>id<~wso)~(args)^^({
-    case x => alg.New(x._1, x._2, pos, UseSymbol(NoSymbol))
+    case a~b => alg.New(a, b, pos, UseSymbol(NoSymbol))
   }) 
 
   def select: Parser[Option[Ident with Others]] = (("."~>id)?)
@@ -178,7 +175,7 @@ trait FJParser extends JavaTokenParsers with Parsers  {
 
 object FJCompiler {
   import elang.typecheck._
-  def main(args: Array[String]): Unit = {
+  def main2(args: Array[String]): Unit = {
     val files = args.size match {
       case 0 => 
         List("/Users/amanj/Documents/PhD/MyWork/Programming/ScalaFJ/Test.fj")
