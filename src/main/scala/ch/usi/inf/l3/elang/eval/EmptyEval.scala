@@ -36,6 +36,12 @@ class Store private(env: Map[Symbol, Value],
     new Store(env ++ svs.toMap, outer)
   }
 
+  def allString: String = {
+    toString ++ (outer match {
+      case None => ""
+      case Some(x) => x.toString
+    })
+  }
   def lookup(s: Symbol): Value = {
     env.get(s) match {
       case Some(v) => v

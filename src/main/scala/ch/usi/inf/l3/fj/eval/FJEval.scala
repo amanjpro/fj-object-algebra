@@ -1,6 +1,5 @@
 package ch.usi.inf.l3.fj.eval
 
-
 import ch.usi.inf.l3._
 import elang.ast._
 import elang.namer._
@@ -58,15 +57,17 @@ trait FJEval extends FJAlg[Eval with Tree] {
     }
   }
 
-
   def ConstDef(tpe: Eval with Tree, params: List[Eval with Tree], 
           su: Eval with Tree, finit: List[Eval with Tree], 
           po: Position, sym: TermSymbol): Eval with Tree = {
     new Eval with Tree {
       def eval(env: Store): (Value, Store) = {
-        su.eval(env)
-        val (r, env2) = evalList(finit, env)
-        (ObjectValue(sym, env2), env2)
+        val (_, env2) = su.eval(env)
+        val (v, env3) = finit.foldLeft(NoValue: Value, new Store())((z, y) => {
+          val (vt, _) = y.eval(env)
+          (vt, z._2.put(y.symbol, vt))
+        })
+        (ObjectValue(sym, env3), env3)
       }
       def index: Unit = sym.owner match {
         case o: ClassSymbol =>
@@ -155,7 +156,7 @@ trait FJEval extends FJAlg[Eval with Tree] {
   def Ident(name: String, po: Position, sym: UseSymbol): Eval with Tree  = {
     new Eval with Tree {
       def eval(env: Store): (Value, Store) = {
-        (env.lookup(symbol), env)
+        (env.lookup(symbol.uses), env)
       }
       val symbol: UseSymbol = sym
       type S = UseSymbol
@@ -170,7 +171,7 @@ trait FJEval extends FJAlg[Eval with Tree] {
     new Eval with Tree {
       def eval(env: Store): (Value, Store) = {
         val (_, senv) = s.eval(env)
-        (senv.lookup(symbol), env)
+        (senv.lookup(symbol), senv)
       }
       val pos: Position = po
       def index: Unit = ()
@@ -200,9 +201,9 @@ trait FJEval extends FJAlg[Eval with Tree] {
             symbol.uses match {
               case ms : TermSymbol => 
                 val meval = ceval(ms)
-                val senv3 = senv2.put(vpzip)
-                val (v, _) = meval.eval(senv3)
-                (v, senv2)
+                val senv4 = senv2.put(vpzip)
+                val (v, senv5) = meval.eval(senv4)
+                (v, senv5)
               case _ => 
                 (NoValue, env)
             }
@@ -217,7 +218,6 @@ trait FJEval extends FJAlg[Eval with Tree] {
     }
   }
 
-
   def New(id: Eval with Tree, 
             args: List[Eval with Tree], po: Position,
             sym: UseSymbol): Eval with Tree = {
@@ -229,7 +229,7 @@ trait FJEval extends FJAlg[Eval with Tree] {
             val mso = ts.method(Names.CONSTRUCTOR)
             mso match {
               case Some(ms) => 
-                val env2 = new Store()
+                val env2 = env.enter
                 val (vargs, _) = evalList(args, env)
                 val vpzip = ms.tpe match {
                   case t: MethodType => 
@@ -253,7 +253,6 @@ trait FJEval extends FJAlg[Eval with Tree] {
       type S = UseSymbol
     }
   }
-
 
   def Cast(id: Eval with Tree, expr: Eval with Tree, 
             po: Position, sym: UseSymbol): Eval with Tree  = {
