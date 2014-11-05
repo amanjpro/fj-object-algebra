@@ -9,12 +9,12 @@ trait FJAlgDebug extends FJAlg[Show] {
   val level = 2
   def tab(c: Int = 0) = " " * (c * level) 
 
-  private def showList(l: List[Show], delim: String = ", ",
+  protected def showList(l: List[Show], delim: String = ", ",
     col: Int): String = {
     val s = if(delim != ", ") "\n" else ""
     s ++ l.map(_.show(col)).mkString(delim)
   }
-  private def locList(l: List[Show], col: Int = 0): String = {
+  protected def locList(l: List[Show], col: Int = 0): String = {
     l.foldLeft("")((z, y) => {
         z ++ "\n" ++ y.loc(col)
       })

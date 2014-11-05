@@ -41,10 +41,10 @@ trait ClassDef extends Tree {
 
 trait ConstDef extends Tree {
   type S = TermSymbol
-  val t: Ident
-  val params: List[ValDef]
-  val su: Super
-  val finit: List[FieldInit]
+  def t: Ident
+  def params: List[ValDef]
+  def su: Super
+  def finit: List[FieldInit]
 }
 
 trait FieldInit extends Tree {
@@ -117,31 +117,6 @@ trait Cast extends Expr {
   val expr: Expr
   override def toString = s"(${id}) ${expr}"
 }
-
-// case class Literal(v: Constant, pos: Position) extends Expr
-
-
-// trait Constant {
-//   def getInt: Int = ???
-//   def getBool: Boolean = ???
-//   def getFloat: Boolean = ???
-//   def getStr: String = ???
-// }
-// case object NullConst extends Constant
-// case class StrConst(v: String) extends Constant {
-//   override getString: String = v
-// }
-// case class IntConst(v: Int) extends Constant {
-//   override getInt: Int = v
-// }
-// case class BoolConst(v: Boolean) extends Constant {
-//   override getBool: Boolean = v
-// }
-// case class DoubleConst(v: Double) extends Constant {
-//   override getDouble: Double = v
-// }
-//
-
 
 trait GFJAlg[T, E <: T, P <: T, C <: T,
              VD <: T, CD <: T, MD <: T,

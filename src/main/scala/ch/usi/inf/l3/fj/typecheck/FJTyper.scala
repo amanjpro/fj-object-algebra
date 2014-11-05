@@ -49,7 +49,7 @@ trait FJTypers extends FJAlg[TypeCheck with Tree] {
             })
         }
         val duplicatedMethods = 
-          fields.groupBy(_.symbol.tpe.name).map(_._2).filter(_.size > 2)
+          ms.groupBy(_.symbol.tpe.name).map(_._2).filter(_.size > 2)
 
         val mdr = duplicatedMethods match {
           case Nil => Success
@@ -302,19 +302,19 @@ trait FJTypers extends FJAlg[TypeCheck with Tree] {
   /***************************************************************************
    * Helper functions                                                        *
    ***************************************************************************/
-  private def typeNotFound(tpe: Type, po: Position): String = {
+  protected def typeNotFound(tpe: Type, po: Position): String = {
     s"Type ${tpe} is not defined\n${po}"
   }
 
-  private def memberNotFound(m: String, tpe: Type, po: Position): String = {
+  protected def memberNotFound(m: String, tpe: Type, po: Position): String = {
     s"${m} is not a member of ${tpe}\n${po}"
   }
 
-  def checkList(l: List[TypeCheck with Tree]): Result = {
+  protected def checkList(l: List[TypeCheck with Tree]): Result = {
     l.foldLeft(Success: Result)((z, y) => z && y.check)
   }
 
-  private def applyCheck(args: List[TypeCheck with Tree],
+  protected def applyCheck(args: List[TypeCheck with Tree],
             mtpe: MethodType, po: Position): Result = {
     val atpe = args.map(_.symbol.tpe)
     val ptpe = mtpe.params.map(_.tpe)

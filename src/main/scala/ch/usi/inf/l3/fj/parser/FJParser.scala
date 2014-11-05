@@ -70,8 +70,8 @@ trait FJParser extends JavaTokenParsers with Parsers  {
   lazy val program: Parser[Program with Others] = clazzes~expr^^({
     case a~b => alg.Program(a, b)
   })
-  lazy val clazzes: Parser[List[ClassDef with Others]] = rep(clazz)
-  lazy val clazz: Parser[ClassDef with Others] = {
+  def clazzes: Parser[List[ClassDef with Others]] = rep(clazz)
+  def clazz: Parser[ClassDef with Others] = {
     ("class"~>ws~>id<~ws)~(parent<~wso<~"{"<~wso)~
         (fields<~wso)~(const<~wso)~(methods<~wso<~"}")^^({
       case a~b~c~d~e =>
@@ -102,8 +102,8 @@ trait FJParser extends JavaTokenParsers with Parsers  {
         alg.ConstDef(a, b, c._1, c._2, pos, TermSymbol())
     })
 
-  lazy val methods: Parser[List[MethodDef with Others]] = rep(method)
-  lazy val method: Parser[MethodDef with Others] = 
+  def methods: Parser[List[MethodDef with Others]] = rep(method)
+  def method: Parser[MethodDef with Others] = 
     (id<~ws)~(id<~"("<~wso)~(params<~wso<~")"<~wso<~"{"<~
             wso<~"return"<~ws)~(expr<~wso<~";"<~wso<~"}")^^({
       case a~b~c~d => 
