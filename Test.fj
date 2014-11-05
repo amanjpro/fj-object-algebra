@@ -1,0 +1,39 @@
+class A extends Object { 
+
+  A() {
+    super();
+  }
+}
+class B extends Object { 
+  
+}
+
+interface C {
+  A length();
+}
+
+class Pair extends Object implements C {
+  Object fst;
+  Object snd;
+
+  Pair (Object fst1, Object snd2) {
+    super();
+    this.fst = fst1;
+    this.snd = snd2; 
+  }
+
+  Pair setfst(Object newfst) {
+    return new Pair(newfst, this.snd);
+  }
+
+  Pair setsnd(Object newscd) {
+    return new Pair(this.fst, newscd);
+  }
+
+  A length() {
+    return new A();
+  }
+}
+
+new Pair(new A(), new B()).setfst(new B())
+
