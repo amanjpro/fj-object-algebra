@@ -77,7 +77,7 @@ trait IFJParser extends FJParser {
 
 
 object IFJCompiler {
-  def main(args: Array[String]): Unit = {
+  def main3(args: Array[String]): Unit = {
     val files = args.size match {
       case 0 => 
         List("/Users/amanj/Documents/PhD/MyWork/Programming/ScalaFJ/Test.fj")

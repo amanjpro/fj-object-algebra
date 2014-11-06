@@ -46,23 +46,23 @@ trait FJExprCompilerTrait extends FJCompilerTrait {
 
 
 
-    override val a = FJExprAlgAST
-    override val b = FJExprNamer
-    override val c = new FJExprAnalyzer(b)
-    override val d = new FJExprTyper(b)
-    override val e = FJExprEval
-    override val f = FJExprDebug
+    val ae = FJExprAlgAST
+    val be = FJExprNamer
+    val ce = new FJExprAnalyzer(be)
+    val de = new FJExprTyper(be)
+    val ee = FJExprEval
+    val fe = FJExprDebug
 
     def BinOp(lhs: Expr with Others, op: Bop, 
         rhs: Expr with Others, pos: Position, 
         symbol: UseSymbol): BinOp with Others = {
 
-      val v1 = a.BinOp(lhs, op, rhs, pos, symbol)
-      val v2 = b.BinOp(lhs, op, rhs, pos, symbol)
-      val v3 = c.BinOp(lhs, op, rhs, pos, symbol)
-      val v4 = d.BinOp(lhs, op, rhs, pos, symbol)
-      val v5 = e.BinOp(lhs, op, rhs, pos, symbol)
-      val v6 = f.BinOp(lhs, op, rhs, pos, symbol)
+      val v1 = ae.BinOp(lhs, op, rhs, pos, symbol)
+      val v2 = be.BinOp(lhs, op, rhs, pos, symbol)
+      val v3 = ce.BinOp(lhs, op, rhs, pos, symbol)
+      val v4 = de.BinOp(lhs, op, rhs, pos, symbol)
+      val v5 = ee.BinOp(lhs, op, rhs, pos, symbol)
+      val v6 = fe.BinOp(lhs, op, rhs, pos, symbol)
 
       new BinOp with Namer with Analyzer with TypeCheck with Eval with Show {
         //Tree
@@ -98,12 +98,12 @@ trait FJExprCompilerTrait extends FJCompilerTrait {
     def UniOp(op: Uop, expr: Expr with Others, 
         pos: Position, symbol: UseSymbol): UniOp with Others = {
 
-      val v1 = a.UniOp(op, expr, pos, symbol)
-      val v2 = b.UniOp(op, expr, pos, symbol)
-      val v3 = c.UniOp(op, expr, pos, symbol)
-      val v4 = d.UniOp(op, expr, pos, symbol)
-      val v5 = e.UniOp(op, expr, pos, symbol)
-      val v6 = f.UniOp(op, expr, pos, symbol)
+      val v1 = ae.UniOp(op, expr, pos, symbol)
+      val v2 = be.UniOp(op, expr, pos, symbol)
+      val v3 = ce.UniOp(op, expr, pos, symbol)
+      val v4 = de.UniOp(op, expr, pos, symbol)
+      val v5 = ee.UniOp(op, expr, pos, symbol)
+      val v6 = fe.UniOp(op, expr, pos, symbol)
 
       new UniOp with Namer with Analyzer with TypeCheck with Eval with Show {
         //Tree
@@ -136,12 +136,12 @@ trait FJExprCompilerTrait extends FJCompilerTrait {
     }
 
     def Literal(v: Int, pos: Position): Literal with Others = {
-      val v1 = a.Literal(v, pos)
-      val v2 = b.Literal(v, pos)
-      val v3 = c.Literal(v, pos)
-      val v4 = d.Literal(v, pos)
-      val v5 = e.Literal(v, pos)
-      val v6 = f.Literal(v, pos)
+      val v1 = ae.Literal(v, pos)
+      val v2 = be.Literal(v, pos)
+      val v3 = ce.Literal(v, pos)
+      val v4 = de.Literal(v, pos)
+      val v5 = ee.Literal(v, pos)
+      val v6 = fe.Literal(v, pos)
       
       new Literal with Namer with Analyzer with TypeCheck with Eval with Show {
         //Tree
@@ -172,12 +172,12 @@ trait FJExprCompilerTrait extends FJCompilerTrait {
       }
     }
     def Literal(v: Double, pos: Position): Literal with Others = {
-      val v1 = a.Literal(v, pos)
-      val v2 = b.Literal(v, pos)
-      val v3 = c.Literal(v, pos)
-      val v4 = d.Literal(v, pos)
-      val v5 = e.Literal(v, pos)
-      val v6 = f.Literal(v, pos)
+      val v1 = ae.Literal(v, pos)
+      val v2 = be.Literal(v, pos)
+      val v3 = ce.Literal(v, pos)
+      val v4 = de.Literal(v, pos)
+      val v5 = ee.Literal(v, pos)
+      val v6 = fe.Literal(v, pos)
       
       new Literal with Namer with Analyzer with TypeCheck with Eval with Show {
         //Tree
@@ -208,12 +208,12 @@ trait FJExprCompilerTrait extends FJCompilerTrait {
       }
     }
     def Literal(v: Boolean, pos: Position): Literal with Others = {
-      val v1 = a.Literal(v, pos)
-      val v2 = b.Literal(v, pos)
-      val v3 = c.Literal(v, pos)
-      val v4 = d.Literal(v, pos)
-      val v5 = e.Literal(v, pos)
-      val v6 = f.Literal(v, pos)
+      val v1 = ae.Literal(v, pos)
+      val v2 = be.Literal(v, pos)
+      val v3 = ce.Literal(v, pos)
+      val v4 = de.Literal(v, pos)
+      val v5 = ee.Literal(v, pos)
+      val v6 = fe.Literal(v, pos)
       
       new Literal with Namer with Analyzer with TypeCheck with Eval with Show {
         //Tree
@@ -244,12 +244,12 @@ trait FJExprCompilerTrait extends FJCompilerTrait {
       }
     }
     def Literal(v: String, pos: Position): Literal with Others = {
-      val v1 = a.Literal(v, pos)
-      val v2 = b.Literal(v, pos)
-      val v3 = c.Literal(v, pos)
-      val v4 = d.Literal(v, pos)
-      val v5 = e.Literal(v, pos)
-      val v6 = f.Literal(v, pos)
+      val v1 = ae.Literal(v, pos)
+      val v2 = be.Literal(v, pos)
+      val v3 = ce.Literal(v, pos)
+      val v4 = de.Literal(v, pos)
+      val v5 = ee.Literal(v, pos)
+      val v6 = fe.Literal(v, pos)
       
       new Literal with Namer with Analyzer with TypeCheck with Eval with Show {
         //Tree
@@ -280,12 +280,12 @@ trait FJExprCompilerTrait extends FJCompilerTrait {
       }
     }
     def NullLiteral(pos: Position): Literal with Others = {
-      val v1 = a.NullLiteral(pos)
-      val v2 = b.NullLiteral(pos)
-      val v3 = c.NullLiteral(pos)
-      val v4 = d.NullLiteral(pos)
-      val v5 = e.NullLiteral(pos)
-      val v6 = f.NullLiteral(pos)
+      val v1 = ae.NullLiteral(pos)
+      val v2 = be.NullLiteral(pos)
+      val v3 = ce.NullLiteral(pos)
+      val v4 = de.NullLiteral(pos)
+      val v5 = ee.NullLiteral(pos)
+      val v6 = fe.NullLiteral(pos)
       
       new Literal with Namer with Analyzer with TypeCheck with Eval with Show {
         //Tree

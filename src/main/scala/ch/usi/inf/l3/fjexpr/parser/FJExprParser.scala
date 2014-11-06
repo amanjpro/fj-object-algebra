@@ -140,7 +140,7 @@ trait FJExprParser extends FJParser {
 
 
 object FJExprCompiler {
-  def main(args: Array[String]): Unit = {
+  def main2(args: Array[String]): Unit = {
     val files = args.size match {
       case 0 => 
         List("/Users/amanj/Documents/PhD/MyWork/Programming/ScalaFJ/Test.fj")

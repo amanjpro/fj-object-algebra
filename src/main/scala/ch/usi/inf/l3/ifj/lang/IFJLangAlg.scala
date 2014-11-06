@@ -46,22 +46,22 @@ trait IFJCompilerTrait extends FJCompilerTrait {
                                    AbstractMethod with Others] 
                     with FJLangAlg {
 
-    override val a = IFJAlgAST
-    override val b = IFJNamer
-    override val c = new IFJAnalyzer(b)
-    override val d = new IFJTyper(b)
-    override val e = IFJEval
-    override val f = IFJAlgDebug
+    val ia: IFJAlgAST = IFJAlgAST
+    val ib: IFJNamer = IFJNamer
+    val ic: IFJAnalyzers = new IFJAnalyzer(ib)
+    val id: IFJTypers = new IFJTyper(ib)
+    val ie: IFJEval = IFJEval
+    val iif: IFJAlgDebug = IFJAlgDebug
 
     def Interface(n: String, ps: List[Ident with Others], 
                   ms: List[AbstractMethod with Others], po: Position,
                   sym: ClassSymbol): Interface with Others = {
-      val v1 = a.Interface(n, ps, ms, po, sym)
-      val v2 = b.Interface(n, ps, ms, po, sym)
-      val v3 = c.Interface(n, ps, ms, po, sym)
-      val v4 = d.Interface(n, ps, ms, po, sym)
-      val v5 = e.Interface(n, ps, ms, po, sym)
-      val v6 = f.Interface(n, ps, ms, po, sym)
+      val v1 = ia.Interface(n, ps, ms, po, sym)
+      val v2 = ib.Interface(n, ps, ms, po, sym)
+      val v3 = ic.Interface(n, ps, ms, po, sym)
+      val v4 = id.Interface(n, ps, ms, po, sym)
+      val v5 = ie.Interface(n, ps, ms, po, sym)
+      val v6 = iif.Interface(n, ps, ms, po, sym)
 
       new Interface with Namer with Analyzer with 
                         TypeCheck with Eval with Show {
@@ -100,12 +100,12 @@ trait IFJCompilerTrait extends FJCompilerTrait {
                 fs: List[ValDef with Others],
                 con: ConstDef with Others, ms: List[MethodDef with Others], 
                 po: Position, sym: ClassSymbol): IClassDef with Others = {
-      val v1 = a.ClassDef(n, p, is, fs, con, ms, po, sym)
-      val v2 = b.ClassDef(n, p, is, fs, con, ms, po, sym)
-      val v3 = c.ClassDef(n, p, is, fs, con, ms, po, sym)
-      val v4 = d.ClassDef(n, p, is, fs, con, ms, po, sym)
-      val v5 = e.ClassDef(n, p, is, fs, con, ms, po, sym)
-      val v6 = f.ClassDef(n, p, is, fs, con, ms, po, sym)
+      val v1 = ia.ClassDef(n, p, is, fs, con, ms, po, sym)
+      val v2 = ib.ClassDef(n, p, is, fs, con, ms, po, sym)
+      val v3 = ic.ClassDef(n, p, is, fs, con, ms, po, sym)
+      val v4 = id.ClassDef(n, p, is, fs, con, ms, po, sym)
+      val v5 = ie.ClassDef(n, p, is, fs, con, ms, po, sym)
+      val v6 = iif.ClassDef(n, p, is, fs, con, ms, po, sym)
 
       new IClassDef with Namer with Analyzer with 
                         TypeCheck with Eval with Show {
@@ -154,12 +154,12 @@ trait IFJCompilerTrait extends FJCompilerTrait {
           params: List[ValDef with Others], 
           body: Expr with Others, pos: Position, 
           symbol: TermSymbol): MethodDef with Others = {
-      val v1 = a.MethodDef(tpe, name, params, body, pos, symbol)
-      val v2 = b.MethodDef(tpe, name, params, body, pos, symbol)
-      val v3 = c.MethodDef(tpe, name, params, body, pos, symbol)
-      val v4 = d.MethodDef(tpe, name, params, body, pos, symbol)
-      val v5 = e.MethodDef(tpe, name, params, body, pos, symbol)
-      val v6 = f.MethodDef(tpe, name, params, body, pos, symbol)
+      val v1 = ia.MethodDef(tpe, name, params, body, pos, symbol)
+      val v2 = ib.MethodDef(tpe, name, params, body, pos, symbol)
+      val v3 = ic.MethodDef(tpe, name, params, body, pos, symbol)
+      val v4 = id.MethodDef(tpe, name, params, body, pos, symbol)
+      val v5 = ie.MethodDef(tpe, name, params, body, pos, symbol)
+      val v6 = iif.MethodDef(tpe, name, params, body, pos, symbol)
 
       new IMethodDef with Namer with Analyzer with 
                     TypeCheck with Eval with Show {
@@ -199,12 +199,12 @@ trait IFJCompilerTrait extends FJCompilerTrait {
           params: List[ValDef with Others], 
           pos: Position, 
           symbol: TermSymbol): AbstractMethod with Others = {
-      val v1 = a.AbstractMethod(tpe, name, params, pos, symbol)
-      val v2 = b.AbstractMethod(tpe, name, params, pos, symbol)
-      val v3 = c.AbstractMethod(tpe, name, params, pos, symbol)
-      val v4 = d.AbstractMethod(tpe, name, params, pos, symbol)
-      val v5 = e.AbstractMethod(tpe, name, params, pos, symbol)
-      val v6 = f.AbstractMethod(tpe, name, params, pos, symbol)
+      val v1 = ia.AbstractMethod(tpe, name, params, pos, symbol)
+      val v2 = ib.AbstractMethod(tpe, name, params, pos, symbol)
+      val v3 = ic.AbstractMethod(tpe, name, params, pos, symbol)
+      val v4 = id.AbstractMethod(tpe, name, params, pos, symbol)
+      val v5 = ie.AbstractMethod(tpe, name, params, pos, symbol)
+      val v6 = iif.AbstractMethod(tpe, name, params, pos, symbol)
 
       new AbstractMethod with Namer with Analyzer with 
                     TypeCheck with Eval with Show {
@@ -239,14 +239,14 @@ trait IFJCompilerTrait extends FJCompilerTrait {
       }
     }
 
-    override def New(id: Ident with Others, args: List[Expr with Others], 
+    override def New(i: Ident with Others, args: List[Expr with Others], 
               pos: Position, sym: UseSymbol): New with Others = {
-      val v1 = a.New(id, args, pos, sym)
-      val v2 = b.New(id, args, pos, sym)
-      val v3 = c.New(id, args, pos, sym)
-      val v4 = d.New(id, args, pos, sym)
-      val v5 = e.New(id, args, pos, sym)
-      val v6 = f.New(id, args, pos, sym)
+      val v1 = ia.New(i, args, pos, sym)
+      val v2 = ib.New(i, args, pos, sym)
+      val v3 = ic.New(i, args, pos, sym)
+      val v4 = id.New(i, args, pos, sym)
+      val v5 = ie.New(i, args, pos, sym)
+      val v6 = iif.New(i, args, pos, sym)
 
       new New with Namer with Analyzer with TypeCheck with Eval with Show {
         //Tree

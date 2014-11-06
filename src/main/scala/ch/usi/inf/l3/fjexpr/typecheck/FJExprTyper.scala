@@ -40,6 +40,12 @@ case object BoolType extends PrimitiveType {
 
 case object NullType extends PrimitiveType {
   val name = "Null"
+  override def isSubtypeOf(other: TType): Boolean = {
+    other match {
+      case s: TType => true
+      case _ => false
+    }
+  }
 }
 
 trait FJExprTypers extends FJExprAlg[TypeCheck with Tree] with FJTypers {
